@@ -10,7 +10,10 @@ import { submitPullRequest } from './submit_prs';
 import {
   createPrBodyFooter,
   footerFooter,
+  footerMarkerEnd,
+  footerMarkerStart,
   footerTitle,
+  wrapFooter,
 } from '../create_pr_body_footer';
 import { execFileSync } from 'child_process';
 
@@ -163,7 +166,7 @@ export async function submitAction(
     }
 
     const footer = createPrBodyFooter(context, branch);
-    const prFooterChanged = !prInfo.body?.includes(footer);
+    const prFooterChanged = shouldUpdatePrFooter(prInfo.body, footer);
 
     if (prFooterChanged) {
       execFileSync('gh', [
@@ -187,20 +190,30 @@ export async function submitAction(
   }
 }
 
+// A PR's footer only needs rewriting once its content actually changes.
+// A raw (marker-less) match covers a body from before footerMarkerStart/End
+// existed -- without it, every PR in a stack would get a needless
+// markers-only rewrite the first time someone upgrades Charcoal.
+export function shouldUpdatePrFooter(
+  body: string | undefined,
+  footer: string
+): boolean {
+  if (!body) {
+    return true;
+  }
+
+  return !(body.includes(footer) || body.includes(wrapFooter(footer)));
+}
+
 export function updatePrBodyFooter(
   body: string | undefined,
   footer: string
 ): string {
+  const wrappedFooter = wrapFooter(footer);
+
   if (!body) {
-    return footer;
+    return wrappedFooter;
   }
-
-  // Get the core title and footer text without extra whitespace
-  const titleText = footerTitle.trim().replace(/^\s*\n+|\n+\s*$/g, '');
-  const footerText = footerFooter.trim().replace(/^\s*\n+|\n+\s*$/g, '');
-
-  const escapedTitleText = titleText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const escapedFooterText = footerText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   // Strip every existing footer block (and the blank lines before it), wherever
   // it sits in the body — not just at the very end. Anchoring to end-of-body
@@ -208,12 +221,33 @@ export function updatePrBodyFooter(
   // old footer and appended a second one (duplicate). Removing all of them and
   // re-appending a single footer keeps exactly one, and preserves any other
   // content (e.g. bot sections) that followed it.
-  const footerBlock = new RegExp(
-    `\\s*${escapedTitleText}[\\s\\S]*?${escapedFooterText}`,
+  const markedFooterBlock = new RegExp(
+    `\\s*${escapeRegExp(footerMarkerStart)}[\\s\\S]*?${escapeRegExp(
+      footerMarkerEnd
+    )}`,
     'g'
   );
 
-  return body.replace(footerBlock, '').trimEnd() + footer;
+  // Bodies from before footerMarkerStart/End existed have the footer with no
+  // markers around it; strip that legacy form too so upgrading doesn't leave
+  // a stray duplicate behind.
+  const titleText = footerTitle.trim().replace(/^\s*\n+|\n+\s*$/g, '');
+  const footerText = footerFooter.trim().replace(/^\s*\n+|\n+\s*$/g, '');
+  const legacyFooterBlock = new RegExp(
+    `\\s*${escapeRegExp(titleText)}[\\s\\S]*?${escapeRegExp(footerText)}`,
+    'g'
+  );
+
+  return (
+    body
+      .replace(markedFooterBlock, '')
+      .replace(legacyFooterBlock, '')
+      .trimEnd() + wrappedFooter
+  );
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 async function selectBranches(

@@ -259,6 +259,7 @@ __metadata:
     "@types/chai-as-promised": ^7.1.5
     "@types/fs-extra": ^9.0.13
     "@types/mocha": ^9.1.1
+    "@types/mustache": ^4.2.6
     "@types/node": ^17.0.40
     "@types/prettier": ^2
     "@types/prompts": ^2.4.3
@@ -281,6 +282,7 @@ __metadata:
     fast-json-stable-hash: ^1.0.3
     fs-extra: ^10.1.0
     mocha: ^10.0.0
+    mustache: ^4.2.0
     nock: ^13.2.6
     nyc: ^15.1.0
     pinst: ^3.0.0
@@ -655,6 +657,13 @@ __metadata:
   version: 9.1.1
   resolution: "@types/mocha@npm:9.1.1"
   checksum: 516077c0acd9806dc78317f88aaac0df5aaf0bdc2f63dfdadeabdf0b0137953b6ca65472e6ff7c30bc93ce4e0ae76eae70e8d46764b9a8eae4877a928b6ef49a
+  languageName: node
+  linkType: hard
+
+"@types/mustache@npm:^4.2.6":
+  version: 4.2.6
+  resolution: "@types/mustache@npm:4.2.6"
+  checksum: 6480867fab64737a04fea5568a55cd5c118fa3e76a99f66521387f201abbc9413d6d6b9395379a1fbfa49387189e20cd4ab42678d304e9c3a9af6bf20209bbef
   languageName: node
   linkType: hard
 
@@ -3978,6 +3987,15 @@ __metadata:
     arrify: ^2.0.1
     minimatch: ^3.0.4
   checksum: bdb6a98dad4e919d9a1a2a0db872f44fa2337315f2fd5827d91ae005cf22f4425782bdfa97c10b80d567f0cb3c226c31f4e85f8f6a4a4be4facf9af0de1bb0c2
+  languageName: node
+  linkType: hard
+
+"mustache@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "mustache@npm:4.2.0"
+  bin:
+    mustache: bin/mustache
+  checksum: 928fcb63e3aa44a562bfe9b59ba202cccbe40a46da50be6f0dd831b495be1dd7e38ca4657f0ecab2c1a89dc7bccba0885eab7ee7c1b215830da765758c7e0506
   languageName: node
   linkType: hard
 
