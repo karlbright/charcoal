@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import Mustache from 'mustache';
+import Handlebars from 'handlebars';
 import os from 'os';
 import path from 'path';
 import { TContext } from '../lib/context';
@@ -35,7 +35,8 @@ export function createPrBodyFooter(context: TContext, branch: string): string {
   const customTemplate = readCustomFooterTemplate();
 
   if (customTemplate) {
-    return Mustache.render(customTemplate, {
+    const template = Handlebars.compile(customTemplate);
+    return template({
       prs: entries.map((entry, index) => ({
         number: entry.number,
         branch: entry.branch,
